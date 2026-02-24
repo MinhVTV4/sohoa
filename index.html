@@ -50,7 +50,7 @@
             #resultArea > div.flex,
             #resultArea > p,
             #tool2-section,
-            #tool3-section,
+            #storage-section,
             .tool-divider {
                 display: none !important;
             }
@@ -84,204 +84,207 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen font-sans text-gray-800 py-8 px-4 sm:px-6">
+<body class="bg-gray-100 min-h-screen font-sans text-gray-800">
 
-    <div class="max-w-4xl mx-auto space-y-12">
-        
-        <!-- Header Tổng -->
-        <div class="text-center">
-            <h1 class="text-3xl font-extrabold text-blue-800 mb-2">Hệ Sinh Thái Xử Lý Hồ Sơ Online</h1>
-            <p class="text-gray-600">Trích xuất thông tin AI & Chuyển đổi tài liệu chuẩn định dạng nộp trực tuyến</p>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- CÔNG CỤ 1: QUÉT CCCD BẰNG AI                 -->
-        <!-- ========================================== -->
-        <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-200" id="tool1-section">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm">Công cụ 1</span> 
-                Số hóa CCCD (AI)
-            </h2>
+    <!-- KHU VỰC LÀM VIỆC CHÍNH (WORKSPACE) -->
+    <div class="py-10 px-4 sm:px-6">
+        <div class="max-w-4xl mx-auto space-y-10">
             
-            <!-- Khu vực Upload Ảnh CCCD -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <!-- Mặt trước -->
-                <div class="flex flex-col items-center">
-                    <h3 class="font-semibold text-sm mb-3 text-gray-600 uppercase tracking-wide">Mặt trước CCCD</h3>
-                    <label for="frontImage" class="w-full flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors relative overflow-hidden group">
-                        <div id="frontPlaceholder" class="flex flex-col items-center justify-center pt-5 pb-6">
-                            <svg class="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            <p class="text-sm text-gray-500"><span class="font-semibold text-blue-600">Nhấn để chọn</span> hoặc kéo thả</p>
-                        </div>
-                        <img id="frontPreview" class="absolute inset-0 w-full h-full object-contain hidden bg-black/5" />
-                    </label>
-                    <input id="frontImage" type="file" accept="image/jpeg, image/png, image/webp" onchange="previewImage(this, 'frontPreview', 'frontPlaceholder')" />
-                </div>
-
-                <!-- Mặt sau -->
-                <div class="flex flex-col items-center">
-                    <h3 class="font-semibold text-sm mb-3 text-gray-600 uppercase tracking-wide">Mặt sau CCCD</h3>
-                    <label for="backImage" class="w-full flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors relative overflow-hidden group">
-                        <div id="backPlaceholder" class="flex flex-col items-center justify-center pt-5 pb-6">
-                            <svg class="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            <p class="text-sm text-gray-500"><span class="font-semibold text-blue-600">Nhấn để chọn</span> hoặc kéo thả</p>
-                        </div>
-                        <img id="backPreview" class="absolute inset-0 w-full h-full object-contain hidden bg-black/5" />
-                    </label>
-                    <input id="backImage" type="file" accept="image/jpeg, image/png, image/webp" onchange="previewImage(this, 'backPreview', 'backPlaceholder')" />
-                </div>
+            <!-- Header Tổng -->
+            <div class="text-center">
+                <h1 class="text-3xl font-extrabold text-blue-800 mb-2">Hệ Sinh Thái Xử Lý Hồ Sơ Online</h1>
+                <p class="text-gray-600">Trích xuất thông tin AI & Chuyển đổi tài liệu chuẩn định dạng nộp trực tuyến</p>
             </div>
 
-            <!-- Nút hành động CCCD -->
-            <div class="text-center flex flex-col items-center">
-                <button id="processBtn" onclick="processCCCD()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all flex items-center gap-2 text-lg">
-                    <svg id="btnSpinner" class="hidden w-5 h-5 text-white animate-spin-custom" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span id="btnText">Trích xuất & Tạo PDF</span>
-                </button>
-                <p id="statusMsg" class="mt-3 text-sm font-medium text-gray-600 h-5"></p>
-            </div>
-
-            <!-- Khu vực kết quả (Bản xem trước PDF CCCD) -->
-            <div id="resultArea" class="hidden flex-col items-center mt-8 space-y-4">
-                <hr class="w-full border-gray-200 mb-4">
-                <h2 class="text-2xl font-bold text-gray-800">Bản xem trước Hồ sơ CCCD</h2>
+            <!-- ========================================== -->
+            <!-- CÔNG CỤ 1: QUÉT CCCD BẰNG AI                 -->
+            <!-- ========================================== -->
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-200" id="tool1-section">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm">Công cụ 1</span> 
+                    Số hóa CCCD (AI)
+                </h2>
                 
-                <div class="flex flex-col sm:flex-row flex-wrap gap-4 w-full justify-center mt-2 mb-2">
-                    <button onclick="printPDF()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
-                        In / Lưu PDF (Vector)
-                    </button>
-                    <button onclick="downloadPDFAsImage()" id="btnDownloadImage" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                        <span>Tải PDF Nhanh</span>
-                    </button>
-                    <!-- Nút lưu vào IndexedDB -->
-                    <button onclick="saveToHistory()" id="btnSaveDB" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
-                        <span>Lưu Hồ Sơ (DB)</span>
-                    </button>
-                </div>
-                
-                <div class="pdf-wrapper shadow-2xl" id="pdfWrapperContainer">
-                    <div id="pdf-template">
-                        <div class="border-b-2 border-blue-800 pb-3 mb-5 text-center">
-                            <h1 class="text-2xl font-bold uppercase text-gray-900 tracking-wide">Hồ Sơ Thông Tin Giấy Tờ Tùy Thân</h1>
-                            <p class="text-sm text-gray-500 mt-1">Trích xuất tự động bởi hệ thống AI</p>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-6 mb-6">
-                            <div>
-                                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-3 pb-1">THÔNG TIN CÁ NHÂN</h3>
-                                <div class="space-y-2 text-sm">
-                                    <p><span class="font-semibold text-gray-600 inline-block w-24">Số CCCD:</span> <span id="out-id" class="font-bold text-lg text-blue-700"></span></p>
-                                    <p><span class="font-semibold text-gray-600 inline-block w-24">Họ và tên:</span> <span id="out-name" class="font-bold uppercase text-md"></span></p>
-                                    <p><span class="font-semibold text-gray-600 inline-block w-24">Ngày sinh:</span> <span id="out-dob"></span></p>
-                                    <p><span class="font-semibold text-gray-600 inline-block w-24">Giới tính:</span> <span id="out-gender"></span></p>
-                                    <p><span class="font-semibold text-gray-600 inline-block w-24">Quốc tịch:</span> <span id="out-nationality"></span></p>
-                                </div>
+                <!-- Khu vực Upload Ảnh CCCD -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <!-- Mặt trước -->
+                    <div class="flex flex-col items-center">
+                        <h3 class="font-semibold text-sm mb-3 text-gray-600 uppercase tracking-wide">Mặt trước CCCD</h3>
+                        <label for="frontImage" class="w-full flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors relative overflow-hidden group">
+                            <div id="frontPlaceholder" class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <p class="text-sm text-gray-500"><span class="font-semibold text-blue-600">Nhấn để chọn</span> hoặc kéo thả</p>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-3 pb-1">THÔNG TIN ĐỊA CHỈ & PHÁP LÝ</h3>
-                                <div class="space-y-2 text-sm">
-                                    <p><span class="font-semibold text-gray-600 block mb-1">Quê quán:</span> <span id="out-origin" class="block ml-2 text-gray-800"></span></p>
-                                    <p><span class="font-semibold text-gray-600 block mb-1 mt-2">Nơi thường trú:</span> <span id="out-residence" class="block ml-2 text-gray-800"></span></p>
-                                    <div class="grid grid-cols-2 mt-2">
-                                        <p><span class="font-semibold text-gray-600">Ngày cấp:</span> <br/><span id="out-issueDate"></span></p>
-                                        <p><span class="font-semibold text-gray-600">Có giá trị đến:</span> <br/><span id="out-expiryDate"></span></p>
+                            <img id="frontPreview" class="absolute inset-0 w-full h-full object-contain hidden bg-black/5" />
+                        </label>
+                        <input id="frontImage" type="file" accept="image/jpeg, image/png, image/webp" onchange="previewImage(this, 'frontPreview', 'frontPlaceholder')" />
+                    </div>
+
+                    <!-- Mặt sau -->
+                    <div class="flex flex-col items-center">
+                        <h3 class="font-semibold text-sm mb-3 text-gray-600 uppercase tracking-wide">Mặt sau CCCD</h3>
+                        <label for="backImage" class="w-full flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-blue-50 transition-colors relative overflow-hidden group">
+                            <div id="backPlaceholder" class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <p class="text-sm text-gray-500"><span class="font-semibold text-blue-600">Nhấn để chọn</span> hoặc kéo thả</p>
+                            </div>
+                            <img id="backPreview" class="absolute inset-0 w-full h-full object-contain hidden bg-black/5" />
+                        </label>
+                        <input id="backImage" type="file" accept="image/jpeg, image/png, image/webp" onchange="previewImage(this, 'backPreview', 'backPlaceholder')" />
+                    </div>
+                </div>
+
+                <!-- Nút hành động CCCD -->
+                <div class="text-center flex flex-col items-center">
+                    <button id="processBtn" onclick="processCCCD()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all flex items-center gap-2 text-lg">
+                        <svg id="btnSpinner" class="hidden w-5 h-5 text-white animate-spin-custom" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span id="btnText">Trích xuất & Tạo PDF</span>
+                    </button>
+                    <p id="statusMsg" class="mt-3 text-sm font-medium text-gray-600 h-5"></p>
+                </div>
+
+                <!-- Khu vực kết quả (Bản xem trước PDF CCCD) -->
+                <div id="resultArea" class="hidden flex-col items-center mt-8 space-y-4">
+                    <hr class="w-full border-gray-200 mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Bản xem trước Hồ sơ CCCD</h2>
+                    
+                    <div class="flex flex-col sm:flex-row flex-wrap gap-4 w-full justify-center mt-2 mb-2">
+                        <button onclick="printPDF()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                            In / Lưu PDF (Vector)
+                        </button>
+                        <button onclick="downloadPDFAsImage()" id="btnDownloadImage" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            <span>Tải PDF Nhanh</span>
+                        </button>
+                        <!-- Nút Lưu DB đã được gỡ bỏ vì tính năng tự động lưu -->
+                    </div>
+                    
+                    <div class="pdf-wrapper shadow-2xl" id="pdfWrapperContainer">
+                        <div id="pdf-template">
+                            <div class="border-b-2 border-blue-800 pb-3 mb-5 text-center">
+                                <h1 class="text-2xl font-bold uppercase text-gray-900 tracking-wide">Hồ Sơ Thông Tin Giấy Tờ Tùy Thân</h1>
+                                <p class="text-sm text-gray-500 mt-1">Trích xuất tự động bởi hệ thống AI</p>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-3 pb-1">THÔNG TIN CÁ NHÂN</h3>
+                                    <div class="space-y-2 text-sm">
+                                        <p><span class="font-semibold text-gray-600 inline-block w-24">Số CCCD:</span> <span id="out-id" class="font-bold text-lg text-blue-700"></span></p>
+                                        <p><span class="font-semibold text-gray-600 inline-block w-24">Họ và tên:</span> <span id="out-name" class="font-bold uppercase text-md"></span></p>
+                                        <p><span class="font-semibold text-gray-600 inline-block w-24">Ngày sinh:</span> <span id="out-dob"></span></p>
+                                        <p><span class="font-semibold text-gray-600 inline-block w-24">Giới tính:</span> <span id="out-gender"></span></p>
+                                        <p><span class="font-semibold text-gray-600 inline-block w-24">Quốc tịch:</span> <span id="out-nationality"></span></p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-3 pb-1">THÔNG TIN ĐỊA CHỈ & PHÁP LÝ</h3>
+                                    <div class="space-y-2 text-sm">
+                                        <p><span class="font-semibold text-gray-600 block mb-1">Quê quán:</span> <span id="out-origin" class="block ml-2 text-gray-800"></span></p>
+                                        <p><span class="font-semibold text-gray-600 block mb-1 mt-2">Nơi thường trú:</span> <span id="out-residence" class="block ml-2 text-gray-800"></span></p>
+                                        <div class="grid grid-cols-2 mt-2">
+                                            <p><span class="font-semibold text-gray-600">Ngày cấp:</span> <br/><span id="out-issueDate"></span></p>
+                                            <p><span class="font-semibold text-gray-600">Có giá trị đến:</span> <br/><span id="out-expiryDate"></span></p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-4 pb-2">BẢN SAO HÌNH ẢNH</h3>
-                        
-                        <div class="flex flex-col gap-4 items-center">
-                            <div class="img-container w-full max-w-[480px] border border-gray-200 p-2 rounded-xl bg-gray-50 flex flex-col items-center">
-                                <p class="text-[11px] text-center text-gray-500 font-bold mb-1 tracking-widest uppercase">MẶT TRƯỚC</p>
-                                <img id="out-frontImg" class="w-full aspect-[856/540] object-contain rounded-lg shadow-sm" />
-                            </div>
+                            <h3 class="font-bold text-gray-800 border-b border-gray-300 mb-4 pb-2">BẢN SAO HÌNH ẢNH</h3>
                             
-                            <div class="img-container w-full max-w-[480px] border border-gray-200 p-2 rounded-xl bg-gray-50 flex flex-col items-center">
-                                <p class="text-[11px] text-center text-gray-500 font-bold mb-1 tracking-widest uppercase">MẶT SAU</p>
-                                <img id="out-backImg" class="w-full aspect-[856/540] object-contain rounded-lg shadow-sm" />
+                            <div class="flex flex-col gap-4 items-center">
+                                <div class="img-container w-full max-w-[480px] border border-gray-200 p-2 rounded-xl bg-gray-50 flex flex-col items-center">
+                                    <p class="text-[11px] text-center text-gray-500 font-bold mb-1 tracking-widest uppercase">MẶT TRƯỚC</p>
+                                    <img id="out-frontImg" class="w-full aspect-[856/540] object-contain rounded-lg shadow-sm" />
+                                </div>
+                                
+                                <div class="img-container w-full max-w-[480px] border border-gray-200 p-2 rounded-xl bg-gray-50 flex flex-col items-center">
+                                    <p class="text-[11px] text-center text-gray-500 font-bold mb-1 tracking-widest uppercase">MẶT SAU</p>
+                                    <img id="out-backImg" class="w-full aspect-[856/540] object-contain rounded-lg shadow-sm" />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Thanh chia cách mờ -->
-        <hr class="border-gray-300 border-dashed tool-divider">
-
-        <!-- ========================================== -->
-        <!-- CÔNG CỤ 2: GHÉP NHIỀU TRANG HỒ SƠ THÀNH PDF  -->
-        <!-- ========================================== -->
-        <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-200" id="tool2-section">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-                <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg text-sm">Công cụ 2</span> 
-                Ghép tài liệu thành PDF
-            </h2>
-            <p class="text-gray-500 mb-6 text-sm">Chụp ảnh các trang hồ sơ giấy (7-10 trang) và tải lên đây để ghép thành 1 file PDF duy nhất nộp online. <br/><span class="font-semibold text-purple-600">Mỗi ảnh sẽ được tự động căn giữa vừa khít 1 trang A4.</span></p>
-            
-            <!-- Khu vực tải nhiều ảnh -->
-            <label for="multiImages" class="w-full flex flex-col items-center justify-center p-8 border-2 border-dashed border-purple-300 rounded-xl cursor-pointer hover:bg-purple-50 transition-colors mb-6">
-                <svg class="w-12 h-12 text-purple-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                <p class="text-lg text-gray-600 font-medium">Nhấn để chọn nhiều ảnh</p>
-                <p class="text-sm text-gray-400 mt-1">Định dạng hỗ trợ: JPG, PNG (Có thể chọn nhiều lần)</p>
-            </label>
-            <input id="multiImages" type="file" accept="image/jpeg, image/png, image/webp" multiple onchange="handleMultipleImages(this)" />
-
-            <!-- Lưới hiển thị các trang tài liệu đã chọn -->
-            <div id="multiPreviewContainer" class="hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-gray-700 text-lg">Danh sách các trang (<span id="pageCount">0</span>)</h3>
-                    <button onclick="clearAllImages()" class="text-red-500 hover:text-red-700 text-sm font-semibold">Xóa tất cả</button>
-                </div>
+            <!-- ========================================== -->
+            <!-- CÔNG CỤ 2: GHÉP NHIỀU TRANG HỒ SƠ THÀNH PDF  -->
+            <!-- ========================================== -->
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-200" id="tool2-section">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+                    <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg text-sm">Công cụ 2</span> 
+                    Ghép tài liệu thành PDF
+                </h2>
+                <p class="text-gray-500 mb-6 text-sm">Chụp ảnh các trang hồ sơ giấy (7-10 trang) và tải lên đây để ghép thành 1 file PDF duy nhất nộp online. <br/><span class="font-semibold text-purple-600">Mỗi ảnh sẽ được tự động căn giữa vừa khít 1 trang A4.</span></p>
                 
-                <!-- Grid hiển thị ảnh -->
-                <div id="imageGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
-                    <!-- Ảnh preview sẽ được render vào đây bằng JS -->
-                </div>
+                <!-- Khu vực tải nhiều ảnh -->
+                <label for="multiImages" class="w-full flex flex-col items-center justify-center p-8 border-2 border-dashed border-purple-300 rounded-xl cursor-pointer hover:bg-purple-50 transition-colors mb-6">
+                    <svg class="w-12 h-12 text-purple-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    <p class="text-lg text-gray-600 font-medium">Nhấn để chọn nhiều ảnh</p>
+                    <p class="text-sm text-gray-400 mt-1">Định dạng hỗ trợ: JPG, PNG (Có thể chọn nhiều lần)</p>
+                </label>
+                <input id="multiImages" type="file" accept="image/jpeg, image/png, image/webp" multiple onchange="handleMultipleImages(this)" />
 
-                <!-- Nút tải PDF -->
-                <div class="text-center">
-                    <button onclick="generateMultiPagePDF()" id="btnGenerateMultiPdf" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all flex items-center justify-center gap-2 text-lg w-full md:w-auto mx-auto">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        <span id="textGenerateMultiPdf">Gộp thành 1 file PDF</span>
-                    </button>
+                <!-- Lưới hiển thị các trang tài liệu đã chọn -->
+                <div id="multiPreviewContainer" class="hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-gray-700 text-lg">Danh sách các trang (<span id="pageCount">0</span>)</h3>
+                        <button onclick="clearAllImages()" class="text-red-500 hover:text-red-700 text-sm font-semibold">Xóa tất cả</button>
+                    </div>
+                    
+                    <!-- Grid hiển thị ảnh -->
+                    <div id="imageGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-6">
+                        <!-- Ảnh preview sẽ được render vào đây bằng JS -->
+                    </div>
+
+                    <!-- Nút tải PDF -->
+                    <div class="text-center">
+                        <button onclick="generateMultiPagePDF()" id="btnGenerateMultiPdf" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all flex items-center justify-center gap-2 text-lg w-full md:w-auto mx-auto">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            <span id="textGenerateMultiPdf">Gộp thành 1 file PDF</span>
+                        </button>
+                    </div>
                 </div>
             </div>
+
         </div>
+    </div> <!-- HẾT KHU VỰC LÀM VIỆC -->
 
-        <!-- Thanh chia cách mờ -->
-        <hr class="border-gray-300 border-dashed tool-divider">
-
-        <!-- ========================================== -->
-        <!-- CÔNG CỤ 3: QUẢN LÝ LỊCH SỬ (INDEXED DB)      -->
-        <!-- ========================================== -->
-        <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-200" id="tool3-section">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-                <span class="bg-teal-100 text-teal-700 px-3 py-1 rounded-lg text-sm">Công cụ 3</span> 
-                Quản lý Hồ sơ Đã lưu
-            </h2>
-            <p class="text-gray-500 mb-6 text-sm">Dữ liệu được lưu trữ an toàn ngay trên trình duyệt của máy bạn (Sử dụng IndexedDB).</p>
+    <!-- ========================================== -->
+    <!-- KHÔNG GIAN RIÊNG BIỆT: KHO LƯU TRỮ HỒ SƠ     -->
+    <!-- ========================================== -->
+    <div class="bg-slate-800 py-16 px-4 sm:px-6 mt-10 shadow-inner" id="storage-section">
+        <div class="max-w-4xl mx-auto">
             
-            <!-- Thanh tìm kiếm -->
-            <div class="mb-6 relative">
-                <input type="text" id="searchHistoryInput" onkeyup="filterHistory()" placeholder="Tìm theo tên hoặc số CCCD..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50">
-                <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <div class="flex items-center gap-3 mb-8">
+                <div class="bg-teal-500 p-3 rounded-xl shadow-lg">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Kho Lưu Trữ Cá Nhân</h2>
+                    <p class="text-teal-200 text-sm mt-1">Dữ liệu được lưu trữ tự động và mã hóa an toàn ngay trên trình duyệt máy tính của bạn.</p>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-2xl p-6 shadow-2xl">
+                <!-- Thanh tìm kiếm -->
+                <div class="mb-6 relative">
+                    <input type="text" id="searchHistoryInput" onkeyup="filterHistory()" placeholder="Tìm kiếm nhanh theo Tên hoặc Số CCCD..." class="w-full pl-11 pr-4 py-4 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 bg-slate-50 text-gray-700 font-medium transition-colors">
+                    <svg class="w-6 h-6 text-slate-400 absolute left-3.5 top-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+
+                <!-- Danh sách lịch sử -->
+                <div id="historyGrid" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <p class="text-slate-500 italic">Chưa có hồ sơ nào trong kho lưu trữ.</p>
+                </div>
             </div>
 
-            <!-- Danh sách lịch sử -->
-            <div id="historyGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <p class="text-gray-500 italic text-sm">Chưa có hồ sơ nào được lưu.</p>
-            </div>
         </div>
-
     </div>
 
     <!-- Modal hiển thị lỗi nếu có -->
@@ -296,11 +299,11 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- SCRIPT 0: KHỞI TẠO INDEXED DB                -->
+    <!-- SCRIPT 0: KHỞI TẠO INDEXED DB VÀ TỰ ĐỘNG LƯU -->
     <!-- ========================================== -->
     <script>
         window.db = null;
-        window.currentCCCDData = null; // Biến lưu tạm dữ liệu hồ sơ hiện tại để ném vào DB
+        window.currentCCCDData = null; // Biến lưu tạm dữ liệu hồ sơ hiện tại
         
         const DB_NAME = "HoSoOnlineDB";
         const STORE_NAME = "cccdRecords";
@@ -311,7 +314,6 @@
         dbRequest.onupgradeneeded = function(event) {
             const db = event.target.result;
             if (!db.objectStoreNames.contains(STORE_NAME)) {
-                // Sử dụng timestamp làm khóa chính (Primary Key)
                 const objectStore = db.createObjectStore(STORE_NAME, { keyPath: "timestamp" });
                 objectStore.createIndex("id", "id", { unique: false });
                 objectStore.createIndex("name", "name", { unique: false });
@@ -320,25 +322,18 @@
 
         dbRequest.onsuccess = function(event) {
             window.db = event.target.result;
-            renderHistory(); // Tải danh sách lịch sử ra giao diện
+            renderHistory(); 
         };
 
         dbRequest.onerror = function(event) {
             console.error("Lỗi khởi tạo IndexedDB: ", event.target.error);
         };
 
-        // --- HÀM LƯU HỒ SƠ ---
+        // --- HÀM TỰ ĐỘNG LƯU HỒ SƠ ---
         window.saveToHistory = function() {
-            if (!window.currentCCCDData || !window.db) {
-                window.showError("Không có dữ liệu hợp lệ để lưu. Vui lòng trích xuất bằng AI trước.");
-                return;
-            }
+            if (!window.currentCCCDData || !window.db) return;
 
-            const btn = document.getElementById('btnSaveDB');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `Đang lưu...`;
-
-            // Cập nhật timestamp để mỗi lần nhấn lưu là tạo 1 record log
+            // Tạo timestamp
             window.currentCCCDData.timestamp = Date.now();
 
             const tx = window.db.transaction([STORE_NAME], "readwrite");
@@ -346,23 +341,12 @@
             const request = store.put(window.currentCCCDData);
 
             request.onsuccess = function() {
-                btn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Đã lưu`;
-                btn.classList.replace('bg-teal-600', 'bg-green-600');
-                btn.classList.replace('hover:bg-teal-700', 'hover:bg-green-700');
-                
-                renderHistory(); // Cập nhật lại list ở dưới
-
-                // Trả nút về bình thường sau 2 giây
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.classList.replace('bg-green-600', 'bg-teal-600');
-                    btn.classList.replace('hover:bg-green-700', 'hover:bg-teal-700');
-                }, 2000);
+                console.log("Đã tự động lưu hồ sơ vào IndexedDB");
+                renderHistory(); // Cập nhật lại list ở Kho lưu trữ
             };
 
             request.onerror = function() {
-                window.showError("Có lỗi xảy ra khi ghi vào Cơ sở dữ liệu.");
-                btn.innerHTML = originalText;
+                console.error("Có lỗi xảy ra khi tự động lưu vào Cơ sở dữ liệu.");
             };
         };
 
@@ -377,9 +361,8 @@
 
             request.onsuccess = function() {
                 const records = request.result;
-                grid.innerHTML = ''; // Xóa grid cũ
+                grid.innerHTML = ''; 
 
-                // Lọc theo từ khóa tìm kiếm
                 const filteredRecords = records.filter(rec => {
                     const term = searchTerm.toLowerCase();
                     const name = (rec.name || "").toLowerCase();
@@ -387,11 +370,10 @@
                     return name.includes(term) || id.includes(term);
                 });
 
-                // Sắp xếp mới nhất lên đầu
                 filteredRecords.sort((a, b) => b.timestamp - a.timestamp);
 
                 if (filteredRecords.length === 0) {
-                    grid.innerHTML = `<p class="text-gray-500 italic text-sm">Chưa có hồ sơ nào được lưu phù hợp.</p>`;
+                    grid.innerHTML = `<p class="text-slate-500 italic col-span-2">Chưa có hồ sơ nào phù hợp trong kho lưu trữ.</p>`;
                     return;
                 }
 
@@ -400,19 +382,21 @@
                     const dateString = `${dateObj.getHours()}:${dateObj.getMinutes().toString().padStart(2, '0')} - ${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
                     
                     const card = document.createElement('div');
-                    card.className = "border border-gray-200 rounded-xl p-4 flex flex-col justify-between bg-white hover:shadow-md transition-shadow";
+                    card.className = "border-2 border-slate-100 rounded-xl p-5 flex flex-col justify-between bg-white hover:border-teal-400 hover:shadow-lg transition-all group";
                     card.innerHTML = `
                         <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-bold text-teal-700 text-lg uppercase">${rec.name || "Không xác định"}</h4>
-                                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">${dateString}</span>
+                            <div class="flex justify-between items-start mb-3">
+                                <h4 class="font-bold text-slate-800 text-lg uppercase group-hover:text-teal-700 transition-colors">${rec.name || "Không xác định"}</h4>
+                                <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1.5 rounded-md font-medium">${dateString}</span>
                             </div>
-                            <p class="text-sm text-gray-600"><span class="font-semibold">CCCD:</span> ${rec.id || "N/A"}</p>
-                            <p class="text-sm text-gray-600"><span class="font-semibold">Ngày sinh:</span> ${rec.dob || "N/A"}</p>
+                            <div class="space-y-1">
+                                <p class="text-sm text-slate-600"><span class="font-semibold text-slate-400">CCCD:</span> ${rec.id || "N/A"}</p>
+                                <p class="text-sm text-slate-600"><span class="font-semibold text-slate-400">Ngày sinh:</span> ${rec.dob || "N/A"}</p>
+                            </div>
                         </div>
-                        <div class="mt-4 flex gap-2 justify-end border-t pt-3">
-                            <button onclick="viewRecord(${rec.timestamp})" class="bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm font-semibold py-1.5 px-4 rounded transition-colors">Xem lại & Tạo PDF</button>
-                            <button onclick="deleteRecord(${rec.timestamp})" class="bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold py-1.5 px-4 rounded transition-colors">Xóa</button>
+                        <div class="mt-5 flex gap-2 justify-end pt-4 border-t border-slate-100">
+                            <button onclick="viewRecord(${rec.timestamp})" class="bg-teal-50 hover:bg-teal-500 text-teal-700 hover:text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors">Xem & Xuất PDF</button>
+                            <button onclick="deleteRecord(${rec.timestamp})" class="bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white text-sm font-bold py-2 px-4 rounded-lg transition-colors">Xóa</button>
                         </div>
                     `;
                     grid.appendChild(card);
@@ -437,7 +421,6 @@
                 const data = request.result;
                 if (!data) return;
 
-                // Điền dữ liệu text vào UI
                 document.getElementById('out-id').textContent = data.id || "Không xác định";
                 document.getElementById('out-name').textContent = data.name || "Không xác định";
                 document.getElementById('out-dob').textContent = data.dob || "Không xác định";
@@ -448,7 +431,6 @@
                 document.getElementById('out-issueDate').textContent = data.issueDate || "Không xác định";
                 document.getElementById('out-expiryDate').textContent = data.expiryDate || "Không xác định";
 
-                // Phục hồi hình ảnh base64
                 if (data.frontImgBase64) {
                     document.getElementById('out-frontImg').src = `data:${data.frontImgMime};base64,${data.frontImgBase64}`;
                 }
@@ -456,25 +438,21 @@
                     document.getElementById('out-backImg').src = `data:${data.backImgMime};base64,${data.backImgBase64}`;
                 }
 
-                // Cập nhật biến tạm
                 window.currentCCCDData = data;
 
-                // Hiển thị Result Area
                 document.getElementById('resultArea').classList.remove('hidden');
                 document.getElementById('resultArea').classList.add('flex');
                 
-                // Cuộn lên xem
                 document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
                 
-                // Hiển thị thông báo nhỏ
-                document.getElementById('statusMsg').textContent = "Đã nạp hồ sơ từ cơ sở dữ liệu.";
-                document.getElementById('statusMsg').className = "mt-3 text-sm font-medium text-teal-600 h-5";
+                document.getElementById('statusMsg').textContent = "Đã tải hồ sơ từ Kho lưu trữ.";
+                document.getElementById('statusMsg').className = "mt-3 text-sm font-bold text-teal-600 h-5";
             };
         };
 
         // --- HÀM XÓA RECORD ---
         window.deleteRecord = function(timestamp) {
-            if (!confirm("Bạn có chắc chắn muốn xóa hồ sơ này khỏi máy?")) return;
+            if (!confirm("Hồ sơ này sẽ bị xóa vĩnh viễn khỏi máy tính. Bạn chắc chắn chứ?")) return;
             
             const tx = window.db.transaction([STORE_NAME], "readwrite");
             const store = tx.objectStore(STORE_NAME);
@@ -491,6 +469,13 @@
     <!-- SCRIPT 1: XỬ LÝ GIAO DIỆN & CÔNG CỤ PDF      -->
     <!-- ========================================== -->
     <script>
+        // --- KHỞI TẠO BIẾN TOÀN CỤC ---
+        window.imgData = {
+            front: { base64: null, mime: null },
+            back:  { base64: null, mime: null }
+        };
+        let multiDocumentImages = [];
+
         // ---------------------------------------------
         // LOGIC CÔNG CỤ 1 (CCCD)
         // ---------------------------------------------
@@ -539,7 +524,6 @@
             }
         };
 
-        // Hàm tạm cho CCCD nếu Firebase Module chưa khởi tạo xong
         window.processCCCD = function() {
             window.showError("Hệ thống AI đang khởi tạo hoặc Firebase cấu hình chưa đúng. Vui lòng kiểm tra Console (F12).");
             document.getElementById('statusMsg').textContent = "Xử lý thất bại";
@@ -595,7 +579,7 @@
         };
 
         // ---------------------------------------------
-        // LOGIC CÔNG CỤ 2 (GHÉP NHIỀU ẢNH THÀNH PDF BẰNG JSPDF)
+        // LOGIC CÔNG CỤ 2 (GHÉP NHIỀU ẢNH THÀNH PDF)
         // ---------------------------------------------
         window.handleMultipleImages = function(input) {
             const files = Array.from(input.files);
@@ -790,7 +774,7 @@
                     data.frontImgMime = window.imgData.front.mime;
                     data.backImgBase64 = window.imgData.back.base64;
                     data.backImgMime = window.imgData.back.mime;
-                    window.currentCCCDData = data; // Set current DB object
+                    window.currentCCCDData = data; 
 
                     document.getElementById('out-id').textContent = data.id || "Không xác định";
                     document.getElementById('out-name').textContent = data.name || "Không xác định";
@@ -810,6 +794,11 @@
                     
                     window.setUIState(false, "Phân tích thành công! Kéo xuống để xem và lưu PDF.");
                     
+                    // --- GỌI HÀM LƯU TỰ ĐỘNG ---
+                    if (typeof window.saveToHistory === 'function') {
+                        window.saveToHistory();
+                    }
+
                     document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
 
                 } catch (error) {
