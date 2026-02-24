@@ -50,6 +50,7 @@
             #resultArea > div.flex,
             #resultArea > p,
             #tool2-section,
+            #tool3-section,
             .tool-divider {
                 display: none !important;
             }
@@ -148,7 +149,7 @@
                 <hr class="w-full border-gray-200 mb-4">
                 <h2 class="text-2xl font-bold text-gray-800">Bản xem trước Hồ sơ CCCD</h2>
                 
-                <div class="flex flex-col sm:flex-row gap-4 w-full justify-center mt-2 mb-2">
+                <div class="flex flex-col sm:flex-row flex-wrap gap-4 w-full justify-center mt-2 mb-2">
                     <button onclick="printPDF()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
                         In / Lưu PDF (Vector)
@@ -156,6 +157,11 @@
                     <button onclick="downloadPDFAsImage()" id="btnDownloadImage" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                         <span>Tải PDF Nhanh</span>
+                    </button>
+                    <!-- Nút lưu vào IndexedDB -->
+                    <button onclick="saveToHistory()" id="btnSaveDB" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                        <span>Lưu Hồ Sơ (DB)</span>
                     </button>
                 </div>
                 
@@ -251,6 +257,31 @@
             </div>
         </div>
 
+        <!-- Thanh chia cách mờ -->
+        <hr class="border-gray-300 border-dashed tool-divider">
+
+        <!-- ========================================== -->
+        <!-- CÔNG CỤ 3: QUẢN LÝ LỊCH SỬ (INDEXED DB)      -->
+        <!-- ========================================== -->
+        <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-200" id="tool3-section">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+                <span class="bg-teal-100 text-teal-700 px-3 py-1 rounded-lg text-sm">Công cụ 3</span> 
+                Quản lý Hồ sơ Đã lưu
+            </h2>
+            <p class="text-gray-500 mb-6 text-sm">Dữ liệu được lưu trữ an toàn ngay trên trình duyệt của máy bạn (Sử dụng IndexedDB).</p>
+            
+            <!-- Thanh tìm kiếm -->
+            <div class="mb-6 relative">
+                <input type="text" id="searchHistoryInput" onkeyup="filterHistory()" placeholder="Tìm theo tên hoặc số CCCD..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-gray-50">
+                <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+
+            <!-- Danh sách lịch sử -->
+            <div id="historyGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <p class="text-gray-500 italic text-sm">Chưa có hồ sơ nào được lưu.</p>
+            </div>
+        </div>
+
     </div>
 
     <!-- Modal hiển thị lỗi nếu có -->
@@ -265,25 +296,201 @@
     </div>
 
     <!-- ========================================== -->
+    <!-- SCRIPT 0: KHỞI TẠO INDEXED DB                -->
+    <!-- ========================================== -->
+    <script>
+        window.db = null;
+        window.currentCCCDData = null; // Biến lưu tạm dữ liệu hồ sơ hiện tại để ném vào DB
+        
+        const DB_NAME = "HoSoOnlineDB";
+        const STORE_NAME = "cccdRecords";
+
+        // Mở kết nối IndexedDB
+        const dbRequest = indexedDB.open(DB_NAME, 1);
+
+        dbRequest.onupgradeneeded = function(event) {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                // Sử dụng timestamp làm khóa chính (Primary Key)
+                const objectStore = db.createObjectStore(STORE_NAME, { keyPath: "timestamp" });
+                objectStore.createIndex("id", "id", { unique: false });
+                objectStore.createIndex("name", "name", { unique: false });
+            }
+        };
+
+        dbRequest.onsuccess = function(event) {
+            window.db = event.target.result;
+            renderHistory(); // Tải danh sách lịch sử ra giao diện
+        };
+
+        dbRequest.onerror = function(event) {
+            console.error("Lỗi khởi tạo IndexedDB: ", event.target.error);
+        };
+
+        // --- HÀM LƯU HỒ SƠ ---
+        window.saveToHistory = function() {
+            if (!window.currentCCCDData || !window.db) {
+                window.showError("Không có dữ liệu hợp lệ để lưu. Vui lòng trích xuất bằng AI trước.");
+                return;
+            }
+
+            const btn = document.getElementById('btnSaveDB');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `Đang lưu...`;
+
+            // Cập nhật timestamp để mỗi lần nhấn lưu là tạo 1 record log
+            window.currentCCCDData.timestamp = Date.now();
+
+            const tx = window.db.transaction([STORE_NAME], "readwrite");
+            const store = tx.objectStore(STORE_NAME);
+            const request = store.put(window.currentCCCDData);
+
+            request.onsuccess = function() {
+                btn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Đã lưu`;
+                btn.classList.replace('bg-teal-600', 'bg-green-600');
+                btn.classList.replace('hover:bg-teal-700', 'hover:bg-green-700');
+                
+                renderHistory(); // Cập nhật lại list ở dưới
+
+                // Trả nút về bình thường sau 2 giây
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.replace('bg-green-600', 'bg-teal-600');
+                    btn.classList.replace('hover:bg-green-700', 'hover:bg-teal-700');
+                }, 2000);
+            };
+
+            request.onerror = function() {
+                window.showError("Có lỗi xảy ra khi ghi vào Cơ sở dữ liệu.");
+                btn.innerHTML = originalText;
+            };
+        };
+
+        // --- HÀM HIỂN THỊ DANH SÁCH LỊCH SỬ ---
+        window.renderHistory = function(searchTerm = "") {
+            if (!window.db) return;
+
+            const grid = document.getElementById('historyGrid');
+            const tx = window.db.transaction([STORE_NAME], "readonly");
+            const store = tx.objectStore(STORE_NAME);
+            const request = store.getAll();
+
+            request.onsuccess = function() {
+                const records = request.result;
+                grid.innerHTML = ''; // Xóa grid cũ
+
+                // Lọc theo từ khóa tìm kiếm
+                const filteredRecords = records.filter(rec => {
+                    const term = searchTerm.toLowerCase();
+                    const name = (rec.name || "").toLowerCase();
+                    const id = (rec.id || "").toLowerCase();
+                    return name.includes(term) || id.includes(term);
+                });
+
+                // Sắp xếp mới nhất lên đầu
+                filteredRecords.sort((a, b) => b.timestamp - a.timestamp);
+
+                if (filteredRecords.length === 0) {
+                    grid.innerHTML = `<p class="text-gray-500 italic text-sm">Chưa có hồ sơ nào được lưu phù hợp.</p>`;
+                    return;
+                }
+
+                filteredRecords.forEach(rec => {
+                    const dateObj = new Date(rec.timestamp);
+                    const dateString = `${dateObj.getHours()}:${dateObj.getMinutes().toString().padStart(2, '0')} - ${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
+                    
+                    const card = document.createElement('div');
+                    card.className = "border border-gray-200 rounded-xl p-4 flex flex-col justify-between bg-white hover:shadow-md transition-shadow";
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-bold text-teal-700 text-lg uppercase">${rec.name || "Không xác định"}</h4>
+                                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">${dateString}</span>
+                            </div>
+                            <p class="text-sm text-gray-600"><span class="font-semibold">CCCD:</span> ${rec.id || "N/A"}</p>
+                            <p class="text-sm text-gray-600"><span class="font-semibold">Ngày sinh:</span> ${rec.dob || "N/A"}</p>
+                        </div>
+                        <div class="mt-4 flex gap-2 justify-end border-t pt-3">
+                            <button onclick="viewRecord(${rec.timestamp})" class="bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm font-semibold py-1.5 px-4 rounded transition-colors">Xem lại & Tạo PDF</button>
+                            <button onclick="deleteRecord(${rec.timestamp})" class="bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold py-1.5 px-4 rounded transition-colors">Xóa</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            };
+        };
+
+        // Tìm kiếm
+        window.filterHistory = function() {
+            const val = document.getElementById('searchHistoryInput').value;
+            renderHistory(val);
+        };
+
+        // --- HÀM XEM LẠI RECORD TỪ LỊCH SỬ ---
+        window.viewRecord = function(timestamp) {
+            if (!window.db) return;
+            const tx = window.db.transaction([STORE_NAME], "readonly");
+            const store = tx.objectStore(STORE_NAME);
+            const request = store.get(timestamp);
+
+            request.onsuccess = function() {
+                const data = request.result;
+                if (!data) return;
+
+                // Điền dữ liệu text vào UI
+                document.getElementById('out-id').textContent = data.id || "Không xác định";
+                document.getElementById('out-name').textContent = data.name || "Không xác định";
+                document.getElementById('out-dob').textContent = data.dob || "Không xác định";
+                document.getElementById('out-gender').textContent = data.gender || "Không xác định";
+                document.getElementById('out-nationality').textContent = data.nationality || "Không xác định";
+                document.getElementById('out-origin').textContent = data.origin || "Không xác định";
+                document.getElementById('out-residence').textContent = data.residence || "Không xác định";
+                document.getElementById('out-issueDate').textContent = data.issueDate || "Không xác định";
+                document.getElementById('out-expiryDate').textContent = data.expiryDate || "Không xác định";
+
+                // Phục hồi hình ảnh base64
+                if (data.frontImgBase64) {
+                    document.getElementById('out-frontImg').src = `data:${data.frontImgMime};base64,${data.frontImgBase64}`;
+                }
+                if (data.backImgBase64) {
+                    document.getElementById('out-backImg').src = `data:${data.backImgMime};base64,${data.backImgBase64}`;
+                }
+
+                // Cập nhật biến tạm
+                window.currentCCCDData = data;
+
+                // Hiển thị Result Area
+                document.getElementById('resultArea').classList.remove('hidden');
+                document.getElementById('resultArea').classList.add('flex');
+                
+                // Cuộn lên xem
+                document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+                
+                // Hiển thị thông báo nhỏ
+                document.getElementById('statusMsg').textContent = "Đã nạp hồ sơ từ cơ sở dữ liệu.";
+                document.getElementById('statusMsg').className = "mt-3 text-sm font-medium text-teal-600 h-5";
+            };
+        };
+
+        // --- HÀM XÓA RECORD ---
+        window.deleteRecord = function(timestamp) {
+            if (!confirm("Bạn có chắc chắn muốn xóa hồ sơ này khỏi máy?")) return;
+            
+            const tx = window.db.transaction([STORE_NAME], "readwrite");
+            const store = tx.objectStore(STORE_NAME);
+            const request = store.delete(timestamp);
+
+            request.onsuccess = function() {
+                renderHistory(document.getElementById('searchHistoryInput').value);
+            };
+        };
+
+    </script>
+
+    <!-- ========================================== -->
     <!-- SCRIPT 1: XỬ LÝ GIAO DIỆN & CÔNG CỤ PDF      -->
     <!-- ========================================== -->
     <script>
-        // ---------------------------------------------
-        // BIẾN TOÀN CỤC & HÀM CHUNG
-        // ---------------------------------------------
-        window.imgData = {
-            front: { base64: null, mime: null },
-            back:  { base64: null, mime: null }
-        };
-        
-        // Mảng lưu trữ danh sách file ảnh của Công cụ 2
-        let multiDocumentImages = [];
-
-        window.showError = function(msg) {
-            document.getElementById('errorText').textContent = msg;
-            document.getElementById('errorModal').classList.remove('hidden');
-        };
-
         // ---------------------------------------------
         // LOGIC CÔNG CỤ 1 (CCCD)
         // ---------------------------------------------
@@ -324,7 +531,7 @@
                 text.textContent = "Đang xử lý...";
                 btn.classList.add('opacity-70', 'cursor-not-allowed');
                 status.classList.add('text-blue-600');
-                status.classList.remove('text-green-600', 'text-red-600');
+                status.classList.remove('text-green-600', 'text-red-600', 'text-teal-600');
             } else {
                 spinner.classList.add('hidden');
                 text.textContent = "Trích xuất & Tạo PDF";
@@ -336,8 +543,7 @@
         window.processCCCD = function() {
             window.showError("Hệ thống AI đang khởi tạo hoặc Firebase cấu hình chưa đúng. Vui lòng kiểm tra Console (F12).");
             document.getElementById('statusMsg').textContent = "Xử lý thất bại";
-            document.getElementById('statusMsg').classList.add('text-red-600');
-            document.getElementById('statusMsg').classList.remove('text-blue-600');
+            document.getElementById('statusMsg').className = "mt-3 text-sm font-medium text-red-600 h-5";
         };
 
         window.printPDF = function() {
@@ -395,7 +601,6 @@
             const files = Array.from(input.files);
             if (files.length === 0) return;
 
-            // Đọc từng file và thêm vào mảng
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -404,8 +609,6 @@
                 }
                 reader.readAsDataURL(file);
             });
-            
-            // Reset input để có thể chọn lại file cũ nếu muốn
             input.value = '';
         };
 
@@ -421,7 +624,7 @@
 
             container.classList.remove('hidden');
             count.textContent = multiDocumentImages.length;
-            grid.innerHTML = ''; // Clear cũ
+            grid.innerHTML = ''; 
 
             multiDocumentImages.forEach((imgSrc, index) => {
                 const div = document.createElement('div');
@@ -450,7 +653,6 @@
             }
         };
 
-        // Hàm nâng cấp: Dùng jsPDF gốc vẽ trực tiếp vào file. Cam kết KHÔNG có trang trống!
         window.generateMultiPagePDF = async function() {
             if (multiDocumentImages.length === 0) {
                 window.showError("Vui lòng tải lên ít nhất 1 ảnh để tạo PDF.");
@@ -460,30 +662,23 @@
             const btn = document.getElementById('btnGenerateMultiPdf');
             const originalContent = btn.innerHTML;
             
-            // Nút loading
             btn.innerHTML = `<svg class="animate-spin-custom h-5 w-5 text-white mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Đang xử lý (${multiDocumentImages.length} trang)...</span>`;
             btn.disabled = true;
             btn.classList.add('opacity-70', 'cursor-not-allowed');
 
             try {
-                // Khởi tạo thư viện jsPDF
                 const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'a4'); // Tạo file khổ A4 chiều dọc
+                const pdf = new jsPDF('p', 'mm', 'a4'); 
                 
-                // Khổ A4 chuẩn là 210mm x 297mm
                 const pdfWidth = 210;
                 const pdfHeight = 297;
 
-                // Lặp qua từng bức ảnh để đưa vào PDF
                 for (let i = 0; i < multiDocumentImages.length; i++) {
-                    // Nếu không phải là trang đầu tiên thì thêm trang trắng mới
                     if (i > 0) {
                         pdf.addPage();
                     }
 
                     const imgData = multiDocumentImages[i];
-                    
-                    // Tải ảnh qua một Image object ảo để lấy kích thước (chiều rộng/cao) của nó
                     const img = await new Promise((resolve, reject) => {
                         const imgObj = new Image();
                         imgObj.onload = () => resolve(imgObj);
@@ -491,38 +686,32 @@
                         imgObj.src = imgData;
                     });
 
-                    // Tính toán tỷ lệ để hình ảnh luôn vừa khít khung A4 mà KHÔNG bị méo
                     const imgRatio = img.width / img.height;
                     const pdfRatio = pdfWidth / pdfHeight;
 
                     let finalWidth, finalHeight, x, y;
 
                     if (imgRatio > pdfRatio) {
-                        // Ảnh thiên về nằm ngang (Rộng hơn tỷ lệ A4) -> Ép vừa chiều rộng giấy
                         finalWidth = pdfWidth;
                         finalHeight = pdfWidth / imgRatio;
-                        x = 0; // Sát lề trái/phải
-                        y = (pdfHeight - finalHeight) / 2; // Căn giữa theo chiều dọc
+                        x = 0; 
+                        y = (pdfHeight - finalHeight) / 2; 
                     } else {
-                        // Ảnh thiên về nằm dọc (Cao hơn tỷ lệ A4) -> Ép vừa chiều cao giấy
                         finalHeight = pdfHeight;
                         finalWidth = pdfHeight * imgRatio;
-                        x = (pdfWidth - finalWidth) / 2; // Căn giữa theo chiều ngang
-                        y = 0; // Sát lề trên/dưới
+                        x = (pdfWidth - finalWidth) / 2; 
+                        y = 0; 
                     }
 
-                    // Nhúng trực tiếp ảnh vào PDF
                     pdf.addImage(imgData, 'JPEG', x, y, finalWidth, finalHeight, undefined, 'FAST');
                 }
 
-                // Tải xuống file hoàn chỉnh
                 pdf.save(`HoSo_DinhKem_${multiDocumentImages.length}_Trang.pdf`);
 
             } catch (err) {
                 console.error("Lỗi tạo PDF nhiều trang:", err);
                 window.showError("Đã xảy ra lỗi khi tạo file PDF. Vui lòng thử lại!");
             } finally {
-                // Khôi phục nút bấm sau khi làm xong
                 btn.innerHTML = originalContent;
                 btn.disabled = false;
                 btn.classList.remove('opacity-70', 'cursor-not-allowed');
@@ -596,6 +785,13 @@
                     let cleanText = text.replace(/```json/g, "").replace(/```/g, "").trim();
                     const data = JSON.parse(cleanText);
 
+                    // Gắn hình ảnh base64 vào data để gửi sang script DB lưu trữ
+                    data.frontImgBase64 = window.imgData.front.base64;
+                    data.frontImgMime = window.imgData.front.mime;
+                    data.backImgBase64 = window.imgData.back.base64;
+                    data.backImgMime = window.imgData.back.mime;
+                    window.currentCCCDData = data; // Set current DB object
+
                     document.getElementById('out-id').textContent = data.id || "Không xác định";
                     document.getElementById('out-name').textContent = data.name || "Không xác định";
                     document.getElementById('out-dob').textContent = data.dob || "Không xác định";
@@ -620,8 +816,7 @@
                     console.error("Lỗi khi gọi Gemini API:", error);
                     window.showError("Lỗi trong quá trình xử lý AI: " + error.message);
                     window.setUIState(false, "Xử lý thất bại");
-                    document.getElementById('statusMsg').classList.add('text-red-600');
-                    document.getElementById('statusMsg').classList.remove('text-blue-600');
+                    document.getElementById('statusMsg').className = "mt-3 text-sm font-medium text-red-600 h-5";
                 }
             };
         } catch (error) {
